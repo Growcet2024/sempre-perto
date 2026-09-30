@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sempre Perto — Mesmo quando estamos longe</title>
+<meta name="description" content="Sempre Perto: uma pequena presença no dia a dia do casal, mesmo quando estamos longe.">
+
+<!-- Fontes do Google (se falhar, o navegador usa Georgia e Arial) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
+
+<style>
+
+/* =====================================================
+   1. CORES
+   Para mudar uma cor, troque só o código hexadecimal.
+   O nome (--wine, --rose...) é usado no resto do CSS.
+   ===================================================== */
+:root{
+  --wine:#4a1530;    /* vinho: títulos e botão */
+  --rose:#d94f74;    /* rosa forte: slogan, pins, detalhes */
+  --blush:#fff3f5;   /* rosa bem claro: topo do fundo */
+  --petal:#fff8f9;   /* fundo do final da página (quase branco) */
+  --ink:#3a2530;     /* cor do texto comum */
+  --mut:#7a5a68;     /* cor dos textos menores */
+}
+
+/* =====================================================
+   2. BASE DA PÁGINA
+   ===================================================== */
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  /* Fundo: começa em --blush, passa pelo rosa do meio e termina em --petal */
+  background:linear-gradient(180deg, var(--blush) 0%, #fff0f3 60%, var(--petal) 100%);
+  color:var(--ink);
+  font-family:"Nunito Sans", system-ui, Arial, sans-serif;
+  font-size:18px;
+  line-height:1.7;
+}
+
+/* Coluna central onde fica todo o conteúdo */
+main{
+  max-width:640px;
+  margin:0 auto;
+  padding:0 24px;
+}
+
+p{
+  margin:0 0 18px;
+}
+
+/* =====================================================
+   3. TÍTULOS (fonte com serifa, mais romântica)
+   ===================================================== */
+h1,
+h2{
+  font-family:Fraunces, Georgia, serif;
+  color:var(--wine);
+  font-weight:600;
+  line-height:1.15;
+}
+
+/* =====================================================
+   4. TOPO (título, slogan, pins e botão)
+   ===================================================== */
+.hero{
+  padding:72px 0 40px;
+  text-align:center;
+}
+
+.hero h1{
+  font-size:clamp(44px, 12vw, 68px);  /* tamanho do título "Sempre Perto" */
+  margin:0 0 8px;
+}
+
+.slogan{
+  font-family:Fraunces, Georgia, serif;
+  font-style:italic;
+  font-size:clamp(20px, 5vw, 26px);
+  color:var(--rose);
+  margin:0 0 36px;
+}
+
+/* Coração do título que pulsa */
+.pulse{
+  display:inline-block;
+  animation:beat 1.6s ease-in-out infinite;  /* 1.6s = velocidade da batida */
+}
+
+@keyframes beat{
+  0%, 100%{ transform:scale(1); }
+  15%{ transform:scale(1.2); }    /* primeira batida */
+  30%{ transform:scale(1); }
+  45%{ transform:scale(1.15); }   /* segunda batida */
+  60%{ transform:scale(1); }
+}
+
+/* Desenho dos dois pins com o coração viajando */
+.link{
+  height:120px;
+  max-width:380px;
+  margin:0 auto 12px;
+}
+
+.link svg{
+  width:100%;
+  height:100%;
+  overflow:visible;
+}
+
+.pin{
+  fill:var(--rose);
+}
+
+.dash{
+  stroke:var(--rose);
+  stroke-width:2;
+  stroke-dasharray:3 8;
+  stroke-linecap:round;
+  fill:none;
+  opacity:0.55;
+}
+
+.heart{
+  animation:go 6s ease-in-out infinite alternate;  /* 6s = tempo da viagem */
+}
+
+@keyframes go{
+  from{ transform:translateX(0); }
+  to{ transform:translateX(220px); }
+}
+
+/* Botão "Em breve" */
+.soon{
+  display:inline-block;
+  margin-top:24px;
+  padding:12px 28px;
+  border-radius:999px;
+  background:var(--wine);
+  color:var(--blush);
+  font-weight:600;
+  font-size:16px;
+}
+
+/* =====================================================
+   5. SEÇÕES DE TEXTO
+   ===================================================== */
+section{
+  padding:36px 0;
+}
+
+/* Frase grande de abertura de cada seção */
+.lead{
+  font-family:Fraunces, Georgia, serif;
+  font-size:clamp(24px, 6vw, 30px);
+  line-height:1.35;
+  color:var(--wine);
+  margin:0 0 20px;
+}
+
+/* "Não é curiosidade. Não é controle. É cuidado." */
+.no{
+  font-family:Fraunces, Georgia, serif;
+  font-size:clamp(22px, 5.5vw, 28px);
+  line-height:1.4;
+  color:var(--rose);
+  margin:24px 0;
+}
+
+/* Os três blocos com emoji (💕 📍 🌹) */
+.item{
+  display:flex;
+  gap:16px;
+  margin:0 0 28px;
+}
+
+.item span{
+  font-size:28px;
+  line-height:1.3;
+}
+
+.item h2{
+  font-size:22px;
+  margin:0 0 4px;
+}
+
+.item p{
+  margin:0;
+  color:var(--mut);
+}
+
+/* Frase final com a linha rosa ao lado */
+blockquote{
+  margin:0;
+  padding:8px 0 8px 20px;
+  border-left:3px solid var(--rose);
+  font-family:Fraunces, Georgia, serif;
+  font-size:clamp(22px, 5.5vw, 27px);
+  line-height:1.4;
+  color:var(--wine);
+}
+
+/* =====================================================
+   6. RODAPÉ
+   ===================================================== */
+footer{
+  text-align:center;
+  padding:48px 0 72px;
+}
+
+footer .nome{
+  font-family:Fraunces, Georgia, serif;
+  font-weight:600;
+  font-size:26px;
+  color:var(--wine);
+  margin:0 0 6px;
+}
+
+footer p{
+  color:var(--mut);
+  margin:0 0 6px;
+}
+
+footer .slogan{
+  margin:14px 0 0;
+}
+
+
+
+
+
+</style>
+</head>
+
+<body>
+<main>
+
+  <!-- ===== TOPO ===== -->
+  <header class="hero">
+    <!-- Título com o coração pulsante -->
+
+    <h1>Sempre Perto <span class="pulse">❤️</span></h1>
+
+    <!-- Slogan do começo -->
+    <p class="slogan">Mesmo quando estamos longe.</p>
+
+    <!-- Desenho: dois pins e um coração indo de um ao outro -->
+    <div class="link" aria-hidden="true">
+      <svg viewBox="0 0 380 120">
+        <path class="dash" d="M40 70 H340"/>
+        <path class="pin" d="M40 70c-10-14-18-22-18-34a18 18 0 0 1 36 0c0 12-8 20-18 34z"/>
+        <circle cx="40" cy="36" r="6" fill="#fff3f5"/>
+        <path class="pin" d="M340 70c-10-14-18-22-18-34a18 18 0 0 1 36 0c0 12-8 20-18 34z"/>
+        <circle cx="340" cy="36" r="6" fill="#fff3f5"/>
+        <g class="heart"><text x="70" y="96" font-size="26">💕</text></g>
+      </svg>
+    </div>
+
+    <!-- Botão. Quando o app estiver na loja, troque por um link <a href="..."> -->
+    <span class="soon">Em breve</span>
+  </header>
+
+  <!-- ===== PRIMEIRO TEXTO ===== -->
+  <section>
+    <p class="lead">Tem dias em que tudo o que queremos é saber que a pessoa que amamos está bem.</p>
+    <p class="no">Não é curiosidade.<br>Não é controle.<br>É cuidado.</p>
+    <p>É aquela vontade de estar perto, mesmo quando a distância não permite. Porque saber que alguém importante para nós está bem traz uma tranquilidade que poucas coisas conseguem trazer.</p>
+  </section>
+
+  <!-- ===== SEGUNDO TEXTO ===== -->
+  <section>
+    <p class="lead">Existe uma pergunta que todo casal já fez: “Onde você está?”</p>
+    <p>Às vezes é saudade. Às vezes é preocupação. Às vezes é só o coração pedindo notícia.</p>
+    <p>O Sempre Perto nasceu para transformar esse sentimento numa pequena presença no dia a dia do casal.</p>
+  </section>
+
+  <!-- ===== OS TRÊS BLOCOS ===== -->
+  <section>
+    <div class="item">
+      <span>💕</span>
+      <div>
+        <h2>Só existe quando os dois querem</h2>
+        <p>Funciona apenas com o sim dos dois. Nada escondido, nada sem permissão: só o que vocês escolheram compartilhar.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span>📍</span>
+      <div>
+        <h2>Um ponto no mapa</h2>
+        <p>E o dia da pessoa que você ama ganha um lugar. Ela está a caminho, chegou bem, está do outro lado da cidade, e você sabe.</p>
+      </div>
+    </div>
+
+    <div class="item">
+      <span>🌹</span>
+      <div>
+        <h2>Um jeito só de vocês</h2>
+        <p>Cada um segue a sua rotina, e vocês continuam próximos.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FRASE FINAL ===== -->
+  <section>
+    <blockquote>Estar perto nem sempre significa estar no mesmo lugar. Às vezes, significa simplesmente saber que existe alguém pensando em você.</blockquote>
+  </section>
+
+  <!-- ===== RODAPÉ ===== -->
+  <footer>
+    <p class="nome">💕 Sempre Perto</p>
+    <p>Para quem ama, cuida e gosta de sentir que o outro está bem.</p>
+    <!-- Slogan do final -->
+    <p class="slogan">Mesmo quando estamos longe.</p>
+  </footer>
+
+</main>
+</body>
+</html>
