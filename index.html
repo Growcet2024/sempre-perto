@@ -2,324 +2,519 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sempre Perto — Mesmo quando estamos longe</title>
-<meta name="description" content="Sempre Perto: uma pequena presença no dia a dia do casal, mesmo quando estamos longe.">
-
-<!-- Fontes do Google (se falhar, o navegador usa Georgia e Arial) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;1,9..144,400&family=Nunito+Sans:wght@400;600&display=swap" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Meus Exames</title>
+<link rel="icon" href="data:,">
 <style>
-
-/* =====================================================
-   1. CORES
-   Para mudar uma cor, troque só o código hexadecimal.
-   O nome (--wine, --rose...) é usado no resto do CSS.
-   ===================================================== */
 :root{
-  --wine:#4a1530;    /* vinho: títulos e botão */
-  --rose:#d94f74;    /* rosa forte: slogan, pins, detalhes */
-  --blush:#fff3f5;   /* rosa bem claro: topo do fundo */
-  --petal:#fff8f9;   /* fundo do final da página (quase branco) */
-  --ink:#3a2530;     /* cor do texto comum */
-  --mut:#7a5a68;     /* cor dos textos menores */
+  --bg:#F2F8F4; --card:#FFFFFF; --btn:#3CA370; --btn-dark:#2E7D5B;
+  --text:#1F2D27; --text2:#6B7D74; --border:#D9E6DD; --danger:#C0392B;
+  color-scheme: light;
 }
-
-/* =====================================================
-   2. BASE DA PÁGINA
-   ===================================================== */
-*{
-  box-sizing:border-box;
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#13201A; --card:#1B2B23; --btn:#3CA370; --btn-dark:#2E7D5B;
+    --text:#EAF3EE; --text2:#9BB3A7; --border:#2C4034; color-scheme: dark;
+  }
 }
-
+:root[data-theme="dark"]{
+  --bg:#13201A; --card:#1B2B23; --btn:#3CA370; --btn-dark:#2E7D5B;
+  --text:#EAF3EE; --text2:#9BB3A7; --border:#2C4034; color-scheme: dark;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;margin:0;}
 body{
-  margin:0;
-  /* Fundo: começa em --blush, passa pelo rosa do meio e termina em --petal */
-  background:linear-gradient(180deg, var(--blush) 0%, #fff0f3 60%, var(--petal) 100%);
-  color:var(--ink);
-  font-family:"Nunito Sans", system-ui, Arial, sans-serif;
-  font-size:18px;
-  line-height:1.7;
+  background:var(--bg); color:var(--text); font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
-
-/* Coluna central onde fica todo o conteúdo */
-main{
-  max-width:640px;
-  margin:0 auto;
-  padding:0 24px;
-}
-
-p{
-  margin:0 0 18px;
-}
-
-/* =====================================================
-   3. TÍTULOS (fonte com serifa, mais romântica)
-   ===================================================== */
-h1,
-h2{
-  font-family:Fraunces, Georgia, serif;
-  color:var(--wine);
-  font-weight:600;
-  line-height:1.15;
-}
-
-/* =====================================================
-   4. TOPO (título, slogan, pins e botão)
-   ===================================================== */
-.hero{
-  padding:72px 0 40px;
-  text-align:center;
-}
-
-.hero h1{
-  font-size:clamp(44px, 12vw, 68px);  /* tamanho do título "Sempre Perto" */
-  margin:0 0 8px;
-}
-
-.slogan{
-  font-family:Fraunces, Georgia, serif;
-  font-style:italic;
-  font-size:clamp(20px, 5vw, 26px);
-  color:var(--rose);
-  margin:0 0 36px;
-}
-
-/* Coração do título que pulsa */
-.pulse{
-  display:inline-block;
-  animation:beat 1.6s ease-in-out infinite;  /* 1.6s = velocidade da batida */
-}
-
-@keyframes beat{
-  0%, 100%{ transform:scale(1); }
-  15%{ transform:scale(1.2); }    /* primeira batida */
-  30%{ transform:scale(1); }
-  45%{ transform:scale(1.15); }   /* segunda batida */
-  60%{ transform:scale(1); }
-}
-
-/* Desenho dos dois pins com o coração viajando */
-.link{
-  height:120px;
-  max-width:380px;
-  margin:0 auto 12px;
-}
-
-.link svg{
-  width:100%;
-  height:100%;
-  overflow:visible;
-}
-
-.pin{
-  fill:var(--rose);
-}
-
-.dash{
-  stroke:var(--rose);
-  stroke-width:2;
-  stroke-dasharray:3 8;
-  stroke-linecap:round;
-  fill:none;
-  opacity:0.55;
-}
-
-.heart{
-  animation:go 6s ease-in-out infinite alternate;  /* 6s = tempo da viagem */
-}
-
-@keyframes go{
-  from{ transform:translateX(0); }
-  to{ transform:translateX(220px); }
-}
-
-/* Botão "Em breve" */
-.soon{
-  display:inline-block;
-  margin-top:24px;
-  padding:12px 28px;
-  border-radius:999px;
-  background:var(--wine);
-  color:var(--blush);
-  font-weight:600;
-  font-size:16px;
-}
-
-/* =====================================================
-   5. SEÇÕES DE TEXTO
-   ===================================================== */
-section{
-  padding:36px 0;
-}
-
-/* Frase grande de abertura de cada seção */
-.lead{
-  font-family:Fraunces, Georgia, serif;
-  font-size:clamp(24px, 6vw, 30px);
-  line-height:1.35;
-  color:var(--wine);
-  margin:0 0 20px;
-}
-
-/* "Não é curiosidade. Não é controle. É cuidado." */
-.no{
-  font-family:Fraunces, Georgia, serif;
-  font-size:clamp(22px, 5.5vw, 28px);
-  line-height:1.4;
-  color:var(--rose);
-  margin:24px 0;
-}
-
-/* Os três blocos com emoji (💕 📍 🌹) */
-.item{
-  display:flex;
-  gap:16px;
-  margin:0 0 28px;
-}
-
-.item span{
-  font-size:28px;
-  line-height:1.3;
-}
-
-.item h2{
-  font-size:22px;
-  margin:0 0 4px;
-}
-
-.item p{
-  margin:0;
-  color:var(--mut);
-}
-
-/* Frase final com a linha rosa ao lado */
-blockquote{
-  margin:0;
-  padding:8px 0 8px 20px;
-  border-left:3px solid var(--rose);
-  font-family:Fraunces, Georgia, serif;
-  font-size:clamp(22px, 5.5vw, 27px);
-  line-height:1.4;
-  color:var(--wine);
-}
-
-/* =====================================================
-   6. RODAPÉ
-   ===================================================== */
-footer{
-  text-align:center;
-  padding:48px 0 72px;
-}
-
-footer .nome{
-  font-family:Fraunces, Georgia, serif;
-  font-weight:600;
-  font-size:26px;
-  color:var(--wine);
-  margin:0 0 6px;
-}
-
-footer p{
-  color:var(--mut);
-  margin:0 0 6px;
-}
-
-footer .slogan{
-  margin:14px 0 0;
-}
-
-
-
-
-
+.wrap{max-width:480px;margin:0 auto;padding:16px;min-height:100%;}
+h1.app-title{font-size:19px;font-weight:600;margin:0 0 10px;}
+header.top{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--btn);color:#fff;border:none;
+  display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-size:16px;font-weight:600;}
+.avatar img{width:100%;height:100%;object-fit:cover;}
+.who{flex:1;min-width:0;}
+.who .name{font-weight:500;font-size:16px;}
+.menu-btn{background:none;border:none;font-size:24px;color:var(--text);cursor:pointer;padding:6px;line-height:1;}
+.offline-note{font-size:13px;color:var(--text2);margin:2px 0 18px;}
+.btn{display:block;width:100%;background:var(--btn);color:#fff;border:none;border-radius:10px;
+  padding:14px;font-size:16px;font-weight:500;margin-bottom:12px;cursor:pointer;text-align:center;}
+.btn:active{background:var(--btn-dark);}
+.btn.secondary{background:none;color:var(--btn-dark);border:1px solid var(--border);}
+.back{background:none;border:none;color:var(--text2);font-size:15px;cursor:pointer;padding:8px 0;margin-bottom:8px;}
+.search{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;background:var(--card);
+  color:var(--text);font-size:15px;margin-bottom:18px;}
+.list-label{font-size:13px;color:var(--text2);margin:0 0 10px;}
+.flat-list{border-top:1px solid var(--border);}
+.flat-item{padding:13px 2px;border-bottom:1px solid var(--border);cursor:pointer;
+  display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+.flat-item .name{font-weight:500;font-size:15px;}
+.flat-item .right{text-align:right;flex-shrink:0;}
+.flat-item .value{font-size:15px;}
+.flat-item .date{font-size:12px;color:var(--text2);}
+.empty{color:var(--text2);text-align:center;padding:40px 16px;font-size:14px;}
+label{display:block;font-size:13px;color:var(--text2);margin:14px 0 6px;}
+input[type=text],input[type=date],input[type=number]{
+  width:100%;padding:12px;border:1px solid var(--border);border-radius:10px;background:var(--card);
+  color:var(--text);font-size:16px;}
+.row{display:flex;gap:10px;}
+.row>*{flex:1;}
+.result-row{padding:12px 2px;border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;}
+.result-row .date{font-size:13px;color:var(--text2);}
+.result-row .value{font-weight:500;font-size:16px;}
+.tag{display:inline-block;font-size:12px;font-weight:500;padding:2px 8px;border-radius:6px;margin-left:6px;}
+.tag-alto{background:#FBEAE8;color:#B23A2E;}
+.tag-baixo{background:#FFF4DE;color:#9A6B10;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag-alto{background:#3A2320;color:#F2A69C;}}
+:root[data-theme="dark"] .tag-alto{background:#3A2320;color:#F2A69C;}
+.edit-link{font-size:13px;color:var(--btn-dark);background:none;border:none;cursor:pointer;padding:4px;}
+.tabs{display:flex;gap:8px;margin-bottom:16px;}
+.tab{flex:1;padding:10px;text-align:center;border-radius:10px;background:var(--card);border:1px solid var(--border);
+  cursor:pointer;font-size:14px;color:var(--text2);}
+.tab.active{background:var(--btn);color:#fff;border-color:var(--btn);}
+.hide{display:none;}
+.err{color:var(--danger);font-size:13px;margin-top:4px;}
+.muted{color:var(--text2);font-size:13px;line-height:1.6;}
+.section-title{font-size:15px;font-weight:500;margin:0 0 10px;}
+.icon-btn{background:none;border:1px solid var(--border);border-radius:10px;padding:10px 14px;
+  font-size:14px;color:var(--text);cursor:pointer;}
+.photo-tag{display:inline-block;background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:7px 16px;font-size:13px;color:var(--btn-dark);cursor:pointer;}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20;}
+.menu-panel{position:fixed;top:0;right:0;bottom:0;width:78%;max-width:300px;background:var(--bg);
+  z-index:21;padding:20px 18px;padding-top:calc(20px + env(safe-area-inset-top,0px));
+  box-shadow:-4px 0 20px rgba(0,0,0,.15);}
+.menu-item{padding:14px 4px;font-size:16px;border-bottom:1px solid var(--border);cursor:pointer;}
+.menu-item:active{color:var(--btn-dark);}
+.menu-close{background:none;border:none;font-size:22px;color:var(--text2);cursor:pointer;margin-bottom:10px;}
 </style>
 </head>
-
 <body>
-<main>
+<div class="wrap" id="app"></div>
 
-  <!-- ===== TOPO ===== -->
-  <header class="hero">
-    <!-- Título com o coração pulsante -->
+<script>
+let db;
+function openDB(){
+  return new Promise((res,rej)=>{
+    const req = indexedDB.open('MeusExamesDB', 1);
+    req.onupgradeneeded = e=>{
+      const d = e.target.result;
+      if(!d.objectStoreNames.contains('profile')) d.createObjectStore('profile',{keyPath:'id'});
+      if(!d.objectStoreNames.contains('exams')) d.createObjectStore('exams',{keyPath:'id',autoIncrement:true});
+      if(!d.objectStoreNames.contains('results')) d.createObjectStore('results',{keyPath:'id',autoIncrement:true});
+    };
+    req.onsuccess = e=>{db=e.target.result; res(db);};
+    req.onerror = e=>rej(e);
+  });
+}
+function tx(store, mode){ return db.transaction(store, mode).objectStore(store); }
+function getAll(store){ return new Promise((res,rej)=>{ const r=tx(store,'readonly').getAll(); r.onsuccess=()=>res(r.result); r.onerror=rej; }); }
+function getOne(store,key){ return new Promise((res,rej)=>{ const r=tx(store,'readonly').get(key); r.onsuccess=()=>res(r.result); r.onerror=rej; }); }
+function put(store,val){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').put(val); r.onsuccess=()=>res(r.result); r.onerror=rej; }); }
+function clearStore(store){ return new Promise((res,rej)=>{ const r=tx(store,'readwrite').clear(); r.onsuccess=()=>res(); r.onerror=rej; }); }
 
-    <h1>Sempre Perto <span class="pulse">❤️</span></h1>
+let profile = null;
+let downloadsCap = null;
+if(typeof claude !== 'undefined' && claude.use){
+  claude.use('downloads').then(d=>downloadsCap=d).catch(()=>{});
+}
 
-    <!-- Slogan do começo -->
-    <p class="slogan">Mesmo quando estamos longe.</p>
+function genId(name){
+  const now=new Date();
+  const p=n=>String(n).padStart(2,'0');
+  const stamp = p(now.getDate())+p(now.getMonth()+1)+String(now.getFullYear()).slice(2);
+  const rand = Math.random().toString(36).slice(2,6);
+  return (name.split(' ')[0]||'Usuario')+'-'+stamp+'d'+rand;
+}
+function fmtDate(iso){
+  if(!iso) return '';
+  const [y,m,d]=iso.split('-');
+  return d+'/'+m+'/'+y.slice(2);
+}
+function initials(name){
+  if(!name) return '?';
+  const parts = name.trim().split(/\s+/);
+  return (parts[0][0] + (parts[1]? parts[1][0] : '')).toUpperCase();
+}
+function escapeHtml(s){ return (s||'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function firstNumber(s){
+  const m = (s||'').replace(',', '.').match(/-?\d+(\.\d+)?/);
+  return m ? parseFloat(m[0]) : null;
+}
+function parseReference(ref){
+  if(!ref) return null;
+  const r = ref.toLowerCase();
+  const nums = (r.match(/-?\d+(\.\d+)?/g)||[]).map(n=>parseFloat(n));
+  if(/\bate\b|\bat\u00e9\b|menor que|menor de|abaixo de/.test(r) && nums.length>=1) return {max: nums[0]};
+  if(/acima de|maior que|maior de|a partir de/.test(r) && nums.length>=1) return {min: nums[0]};
+  if(nums.length>=2) return {min: Math.min(nums[0],nums[1]), max: Math.max(nums[0],nums[1])};
+  return null;
+}
+function compareResult(value, reference){
+  const range = parseReference(reference);
+  if(!range) return null;
+  const v = firstNumber(value);
+  if(v===null) return null;
+  if(range.max!==undefined && v>range.max) return 'alto';
+  if(range.min!==undefined && v<range.min) return 'baixo';
+  return null;
+}
 
-    <!-- Desenho: dois pins e um coração indo de um ao outro -->
-    <div class="link" aria-hidden="true">
-      <svg viewBox="0 0 380 120">
-        <path class="dash" d="M40 70 H340"/>
-        <path class="pin" d="M40 70c-10-14-18-22-18-34a18 18 0 0 1 36 0c0 12-8 20-18 34z"/>
-        <circle cx="40" cy="36" r="6" fill="#fff3f5"/>
-        <path class="pin" d="M340 70c-10-14-18-22-18-34a18 18 0 0 1 36 0c0 12-8 20-18 34z"/>
-        <circle cx="340" cy="36" r="6" fill="#fff3f5"/>
-        <g class="heart"><text x="70" y="96" font-size="26">💕</text></g>
-      </svg>
+const app = document.getElementById('app');
+function render(html){ app.innerHTML = html; }
+
+async function boot(){
+  await openDB();
+  profile = await getOne('profile','main');
+  if(!profile){ profile = {id:'main', name:'', userId:'', avatar:null}; }
+  showHome();
+}
+
+function headerHtml(){
+  const av = profile.avatar ? `<img src="${profile.avatar}">` : initials(profile.name);
+  return `
+    <h1 class="app-title">Meus Exames</h1>
+    <header class="top">
+      <div class="avatar">${av}</div>
+      <div class="who"><div class="name">${escapeHtml(profile.name||'Sem nome cadastrado')}</div></div>
+      <button class="menu-btn" onclick="openMenu()" aria-label="Menu">&#9776;</button>
+    </header>
+    <p class="offline-note">App funciona sem internet</p>
+  `;
+}
+function openMenu(){
+  const overlay = document.createElement('div');
+  overlay.className='overlay'; overlay.id='menuOverlay'; overlay.onclick=closeMenu;
+  const panel = document.createElement('div');
+  panel.className='menu-panel'; panel.onclick=e=>e.stopPropagation();
+  panel.innerHTML = `
+    <button class="menu-close" onclick="closeMenu()">&times;</button>
+    <div class="menu-item" onclick="closeMenu();showPerfil();">Perfil</div>
+    <div class="menu-item" onclick="closeMenu();showCadastro();">Cadastro</div>
+    <div class="menu-item" onclick="closeMenu();showHistorico();">Histórico</div>
+    <div class="menu-item" onclick="closeMenu();showComoUsar();">Como usar</div>
+    <div class="menu-item" onclick="closeMenu();showBackup();">Backup</div>
+  `;
+  document.body.appendChild(overlay);
+  document.body.appendChild(panel);
+}
+function closeMenu(){
+  document.getElementById('menuOverlay')?.remove();
+  document.querySelector('.menu-panel')?.remove();
+}
+
+async function showHome(filter){
+  const noName = !profile.name;
+  const exams = await getAll('exams');
+  const results = await getAll('results');
+  let rows = exams.map(ex=>{
+    const rs = results.filter(r=>r.examId===ex.id).sort((a,b)=>b.date.localeCompare(a.date));
+    return {ex, last: rs[0]};
+  }).filter(r=>r.last);
+  rows.sort((a,b)=>a.ex.name.localeCompare(b.ex.name));
+  const f = (filter||'').toLowerCase();
+  const filtered = f ? rows.filter(r=>r.ex.name.toLowerCase().includes(f)) : rows;
+
+  const itemsHtml = filtered.length ? `<div class="flat-list">` + filtered.map(r=>{
+    const comp = compareResult(r.last.value, r.ex.reference);
+    const tag = comp ? `<span class="tag tag-${comp}">${comp}</span>` : '';
+    return `
+    <div class="flat-item" onclick="showExam(${r.ex.id})">
+      <div class="name">${escapeHtml(r.ex.name)}</div>
+      <div class="right"><div class="value">${escapeHtml(r.last.value)}${tag}</div><div class="date">${fmtDate(r.last.date)}</div></div>
+    </div>`;
+  }).join('') + `</div>` : `<div class="empty">${rows.length? 'Nenhum exame encontrado.' : 'Nenhum resultado lançado ainda. Use o menu para cadastrar um exame.'}</div>`;
+
+  const notice = noName ? `<p class="muted" style="margin:-10px 0 16px;">Cadastre seu nome em <strong style="font-weight:500;color:var(--text)">Perfil</strong> (menu &#9776;) para personalizar o app.</p>` : '';
+  render(`
+    ${headerHtml()}
+    ${notice}
+    <input type="text" class="search" id="searchBox" placeholder="Buscar exame..." value="${escapeHtml(filter||'')}">
+    <p class="list-label">Resultados mais recentes</p>
+    ${itemsHtml}
+  `);
+  window._ultimosRows = filtered;
+  const box = document.getElementById('searchBox');
+  box.oninput = ()=> showHome(box.value);
+  if(filter!==undefined){ box.focus(); box.selectionStart = box.selectionEnd = box.value.length; }
+}
+
+async function showHistorico(filter){
+  const exams = await getAll('exams');
+  exams.sort((a,b)=>a.name.localeCompare(b.name));
+  const f = (filter||'').toLowerCase();
+  const filtered = f ? exams.filter(e=>e.name.toLowerCase().includes(f)) : exams;
+
+  const itemsHtml = filtered.length ? `<div class="flat-list">` + filtered.map(e=>`
+    <div class="flat-item" onclick="showExam(${e.id})">
+      <div class="name">${escapeHtml(e.name)}</div>
+      <div class="right"><div class="date">Ref: ${escapeHtml(e.reference||'-')}</div></div>
+    </div>`).join('') + `</div>` : `<div class="empty">${exams.length? 'Nenhum exame encontrado.' : 'Nenhum exame cadastrado ainda.'}</div>`;
+
+  render(`
+    <button class="back" onclick="showHome()">&larr; Voltar</button>
+    <h1 class="app-title">Histórico</h1>
+    <input type="text" class="search" id="searchBox2" placeholder="Buscar exame..." value="${escapeHtml(filter||'')}">
+    ${itemsHtml}
+  `);
+  const box = document.getElementById('searchBox2');
+  box.oninput = ()=> showHistorico(box.value);
+  if(filter!==undefined){ box.focus(); box.selectionStart = box.selectionEnd = box.value.length; }
+}
+
+function showCadastro(){
+  render(`
+    <button class="back" onclick="showHome()">&larr; Voltar</button>
+    <h1 class="app-title">Cadastrar novo</h1>
+    <label>Nome do exame</label>
+    <input type="text" id="cName" placeholder="Ex: Colesterol Total">
+    <label>Valor de referência</label>
+    <input type="text" id="cRef" placeholder="Ex: 150 a 200 mg/dL">
+    <div id="cErr" class="err hide">Preencha o nome do exame</div>
+    <button class="btn" style="margin-top:16px;" onclick="saveExam()">Salvar</button>
+  `);
+}
+async function saveExam(){
+  const name = document.getElementById('cName').value.trim();
+  const reference = document.getElementById('cRef').value.trim();
+  const err = document.getElementById('cErr');
+  if(!name){ err.classList.remove('hide'); return; }
+  err.classList.add('hide');
+  const id = await put('exams', {name, reference});
+  showExam(id);
+}
+
+async function showExam(examId, editMode){
+  const ex = await getOne('exams', examId);
+  if(!ex){ showHistorico(); return; }
+  let results = await getAll('results');
+  results = results.filter(r=>r.examId===examId).sort((a,b)=>b.date.localeCompare(a.date));
+
+  const editBlock = editMode ? `
+    <label>Nome do exame</label>
+    <input type="text" id="eName" value="${escapeHtml(ex.name)}">
+    <label>Valor de referência</label>
+    <input type="text" id="eRef" value="${escapeHtml(ex.reference||'')}">
+    <div class="row" style="margin-top:14px;">
+      <button class="btn secondary" onclick="showExam(${examId})">Cancelar</button>
+      <button class="btn" onclick="saveExamEdit(${examId})">Salvar</button>
     </div>
+  ` : `
+    <div class="section-title">Lançar novo resultado</div>
+    <label>Data de recebimento</label>
+    <input type="date" id="rDate">
+    <label>Resultado</label>
+    <input type="text" id="rValue" placeholder="Ex: 185 mg/dL">
+    <div id="rErr" class="err hide">Preencha data e resultado</div>
+    <button class="btn" style="margin-top:14px;" onclick="saveResult(${examId})">Lançar</button>
+    <button class="icon-btn" style="margin-top:4px;" onclick="showExam(${examId},true)">Editar nome / referência</button>
+  `;
 
-    <!-- Botão. Quando o app estiver na loja, troque por um link <a href="..."> -->
-    <span class="soon">Em breve</span>
-  </header>
+  const resultsHtml = results.length ? `<div class="flat-list">` + results.map(r=>{
+    const comp = compareResult(r.value, ex.reference);
+    const tag = comp ? `<span class="tag tag-${comp}">${comp}</span>` : '';
+    return `
+    <div class="result-row">
+      <div><div class="value">${escapeHtml(r.value)}${tag}</div><div class="date">${fmtDate(r.date)} &middot; Ref: ${escapeHtml(ex.reference||'-')}</div></div>
+      <button class="edit-link" onclick="editResultPrompt(${r.id},${examId})">editar</button>
+    </div>`;
+  }).join('') + `</div>` : `<div class="empty">Nenhum resultado lançado para este exame.</div>`;
 
-  <!-- ===== PRIMEIRO TEXTO ===== -->
-  <section>
-    <p class="lead">Tem dias em que tudo o que queremos é saber que a pessoa que amamos está bem.</p>
-    <p class="no">Não é curiosidade.<br>Não é controle.<br>É cuidado.</p>
-    <p>É aquela vontade de estar perto, mesmo quando a distância não permite. Porque saber que alguém importante para nós está bem traz uma tranquilidade que poucas coisas conseguem trazer.</p>
-  </section>
+  render(`
+    <button class="back" onclick="showHistorico()">&larr; Voltar ao histórico</button>
+    <h1 class="app-title">${escapeHtml(ex.name)}</h1>
+    <p class="muted" style="margin-bottom:16px;">Referência: ${escapeHtml(ex.reference||'-')}</p>
+    ${editBlock}
+    <p class="list-label" style="margin-top:22px;">Resultados</p>
+    ${resultsHtml}
+    ${results.length? `<button class="icon-btn" style="width:100%;margin-top:12px;" onclick="shareExam(${examId})">Compartilhar</button>` : ''}
+  `);
+}
+async function saveExamEdit(examId){
+  const name = document.getElementById('eName').value.trim();
+  const reference = document.getElementById('eRef').value.trim();
+  if(!name) return;
+  await put('exams', {id:examId, name, reference});
+  showExam(examId);
+}
+async function saveResult(examId){
+  const date = document.getElementById('rDate').value;
+  const value = document.getElementById('rValue').value.trim();
+  const err = document.getElementById('rErr');
+  if(!date || !value){ err.classList.remove('hide'); return; }
+  err.classList.add('hide');
+  await put('results', {examId, date, value});
+  showExam(examId);
+}
+async function editResultPrompt(resultId, examId){
+  const r = await getOne('results', resultId);
+  const newValue = prompt('Novo valor:', r.value);
+  if(newValue===null) return;
+  const newDate = prompt('Nova data (AAAA-MM-DD):', r.date);
+  if(newDate===null) return;
+  await put('results', {id:resultId, examId, date:newDate, value:newValue});
+  showExam(examId);
+}
 
-  <!-- ===== SEGUNDO TEXTO ===== -->
-  <section>
-    <p class="lead">Existe uma pergunta que todo casal já fez: “Onde você está?”</p>
-    <p>Às vezes é saudade. Às vezes é preocupação. Às vezes é só o coração pedindo notícia.</p>
-    <p>O Sempre Perto nasceu para transformar esse sentimento numa pequena presença no dia a dia do casal.</p>
-  </section>
+function makeA4Canvas(title, lines){
+  const W=794, H=1123;
+  const rowH=40, headerH=170, maxRowsPerPage = Math.floor((H-headerH-60)/rowH);
+  const pages = [];
+  for(let i=0;i<lines.length;i+=maxRowsPerPage) pages.push(lines.slice(i,i+maxRowsPerPage));
+  if(pages.length===0) pages.push([]);
+  return pages.map((pageLines, idx)=>{
+    const c = document.createElement('canvas'); c.width=W; c.height=H;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,W,H);
+    ctx.fillStyle='#1F2D27'; ctx.font='500 28px Arial'; ctx.fillText('Meus Exames', 50, 60);
+    ctx.font='400 15px Arial'; ctx.fillStyle='#6B7D74';
+    ctx.fillText(profile.name+(profile.userId? ' (ID: '+profile.userId+')':''), 50, 85);
+    ctx.font='500 22px Arial'; ctx.fillStyle='#1F2D27';
+    ctx.fillText(title + (pages.length>1? ' — página '+(idx+1)+'/'+pages.length : ''), 50, 130);
+    ctx.strokeStyle='#D9E6DD'; ctx.beginPath(); ctx.moveTo(50,150); ctx.lineTo(W-50,150); ctx.stroke();
+    let y = headerH;
+    pageLines.forEach(line=>{
+      ctx.fillStyle='#1F2D27'; ctx.font='500 16px Arial'; ctx.fillText(line.name, 50, y);
+      ctx.fillStyle='#1F2D27'; ctx.font='400 16px Arial'; ctx.fillText(line.value, 330, y);
+      ctx.fillStyle='#6B7D74'; ctx.font='400 13px Arial'; ctx.fillText(line.sub, 330, y+18);
+      ctx.fillStyle='#6B7D74'; ctx.font='400 14px Arial';
+      ctx.textAlign='right'; ctx.fillText(line.date, W-50, y); ctx.textAlign='left';
+      y += rowH;
+    });
+    return c;
+  });
+}
+async function downloadCanvas(canvas, filename){
+  const blob = await new Promise(res=>canvas.toBlob(res,'image/png'));
+  if(downloadsCap){
+    const buf = await blob.arrayBuffer();
+    await downloadsCap.save({filename, data: new Uint8Array(buf)});
+  } else {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+  }
+}
+async function shareExam(examId){
+  const ex = await getOne('exams', examId);
+  let results = await getAll('results');
+  results = results.filter(r=>r.examId===examId).sort((a,b)=>b.date.localeCompare(a.date));
+  const lines = results.map(r=>({name:ex.name, value:r.value, sub:'Ref: '+(ex.reference||'-'), date:fmtDate(r.date)}));
+  const canvases = makeA4Canvas(ex.name, lines);
+  for(let i=0;i<canvases.length;i++) await downloadCanvas(canvases[i], 'MeusExames_'+ex.name.replace(/\s+/g,'_')+'_p'+(i+1)+'.png');
+}
+async function shareUltimos(){
+  const rows = window._ultimosRows || [];
+  const lines = rows.map(r=>({name:r.ex.name, value:r.last.value, sub:'Ref: '+(r.ex.reference||'-'), date:fmtDate(r.last.date)}));
+  const canvases = makeA4Canvas('Últimos resultados', lines);
+  for(let i=0;i<canvases.length;i++) await downloadCanvas(canvases[i], 'MeusExames_Ultimos_p'+(i+1)+'.png');
+}
 
-  <!-- ===== OS TRÊS BLOCOS ===== -->
-  <section>
-    <div class="item">
-      <span>💕</span>
-      <div>
-        <h2>Só existe quando os dois querem</h2>
-        <p>Funciona apenas com o sim dos dois. Nada escondido, nada sem permissão: só o que vocês escolheram compartilhar.</p>
-      </div>
+function showPerfil(firstTime){
+  const av = profile.avatar ? `<img src="${profile.avatar}">` : initials(profile.name);
+  render(`
+    ${firstTime? '' : `<button class="back" onclick="showHome()">&larr; Voltar</button>`}
+    <h1 class="app-title">Perfil</h1>
+    ${firstTime? `<p class="muted" style="margin-bottom:16px;">Cadastre seu nome para começar.</p>` : ''}
+    <div style="text-align:center;margin-bottom:18px;">
+      <div class="avatar" style="width:72px;height:72px;font-size:26px;margin:0 auto 10px;">${av}</div>
+      <label class="photo-tag" for="avatarInput">Escolher foto</label>
+      <input type="file" accept="image/*" id="avatarInput" style="display:none;">
     </div>
-
-    <div class="item">
-      <span>📍</span>
-      <div>
-        <h2>Um ponto no mapa</h2>
-        <p>E o dia da pessoa que você ama ganha um lugar. Ela está a caminho, chegou bem, está do outro lado da cidade, e você sabe.</p>
-      </div>
+    <label>Nome</label>
+    <input type="text" id="sName" value="${escapeHtml(profile.name)}" placeholder="Digite seu nome">
+    <div id="sErr" class="err hide">Digite seu nome para continuar</div>
+    ${profile.userId? `<p class="muted" style="margin-top:10px;">ID: ${escapeHtml(profile.userId)} (não muda ao editar o nome)</p>` : ''}
+    <div class="row" style="margin-top:16px;">
+      ${firstTime? '' : `<button class="btn secondary" onclick="showHome()">Cancelar</button>`}
+      <button class="btn" onclick="saveProfile()">Salvar</button>
     </div>
+  `);
+  document.getElementById('avatarInput').onchange = e=>{
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{ profile.avatar = reader.result; showPerfil(firstTime); };
+    reader.readAsDataURL(file);
+  };
+}
+async function saveProfile(){
+  const name = document.getElementById('sName').value.trim();
+  const err = document.getElementById('sErr');
+  if(!name){ err.classList.remove('hide'); return; }
+  profile.name = name;
+  if(!profile.userId) profile.userId = genId(name);
+  await put('profile', profile);
+  showHome();
+}
 
-    <div class="item">
-      <span>🌹</span>
-      <div>
-        <h2>Um jeito só de vocês</h2>
-        <p>Cada um segue a sua rotina, e vocês continuam próximos.</p>
-      </div>
+function showComoUsar(){
+  render(`
+    <button class="back" onclick="showHome()">&larr; Voltar</button>
+    <h1 class="app-title">Como usar</h1>
+    <div class="muted">
+      <p><strong style="font-weight:500;color:var(--text)">App funciona sem internet.</strong> Todos os registros ficam salvos apenas neste celular — nada é enviado para a internet.</p>
+      <p><strong style="font-weight:500;color:var(--text)">Cadastrar novo:</strong> crie o exame com um nome e o valor de referência (ex: "150 a 200 mg/dL").</p>
+      <p><strong style="font-weight:500;color:var(--text)">Histórico:</strong> busque um exame e toque nele para ver todos os resultados, lançar um novo ou editar o cadastro.</p>
+      <p><strong style="font-weight:500;color:var(--text)">Tela inicial:</strong> mostra o resultado mais recente de cada exame.</p>
+      <p><strong style="font-weight:500;color:var(--text)">Compartilhar:</strong> gera uma imagem no formato A4 com os resultados (se não couber em uma página, gera mais páginas).</p>
     </div>
-  </section>
+  `);
+}
 
-  <!-- ===== FRASE FINAL ===== -->
-  <section>
-    <blockquote>Estar perto nem sempre significa estar no mesmo lugar. Às vezes, significa simplesmente saber que existe alguém pensando em você.</blockquote>
-  </section>
+function showBackup(){
+  render(`
+    <button class="back" onclick="showHome()">&larr; Voltar</button>
+    <h1 class="app-title">Backup</h1>
+    <div class="muted">
+      <p>Ao exportar, o arquivo é salvo na pasta <strong style="font-weight:500;color:var(--text)">Download</strong> do celular.</p>
+      <p>Para importar, o app só encontra o arquivo se ele estiver na pasta Download ou no <strong style="font-weight:500;color:var(--text)">Google Drive</strong>.</p>
+      <p>Recebeu o arquivo pelo WhatsApp de outro celular? Mova-o para o Google Drive antes de importar.</p>
+    </div>
+    <div class="row" style="margin-top:12px;">
+      <button class="btn" onclick="exportBackup()">Exportar</button>
+      <label class="btn secondary" for="importInput" style="margin-bottom:0;">Importar</label>
+    </div>
+    <input type="file" accept=".json,application/json" id="importInput" style="display:none;">
+    <div id="importMsg" class="muted" style="margin-top:8px;"></div>
+  `);
+  document.getElementById('importInput').onchange = importBackup;
+}
+async function exportBackup(){
+  const exams = await getAll('exams');
+  const results = await getAll('results');
+  const data = JSON.stringify({profile, exams, results}, null, 2);
+  const bytes = new TextEncoder().encode(data);
+  if(downloadsCap){
+    await downloadsCap.save({filename:'MeusExames_backup.json', data: bytes});
+  } else {
+    const blob = new Blob([data], {type:'application/json'});
+    const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='MeusExames_backup.json'; a.click();
+  }
+}
+function importBackup(e){
+  const file = e.target.files[0]; if(!file) return;
+  const msg = document.getElementById('importMsg');
+  const reader = new FileReader();
+  reader.onload = async ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      await clearStore('exams'); await clearStore('results');
+      if(data.profile){ profile = {...data.profile, id:'main'}; await put('profile', profile); }
+      for(const ex of (data.exams||[])) await put('exams', ex);
+      for(const r of (data.results||[])) await put('results', r);
+      msg.textContent = 'Backup importado com sucesso.'; msg.style.color = 'var(--btn-dark)';
+    }catch(err){
+      msg.textContent = 'Arquivo inválido. Verifique se é um backup do Meus Exames.'; msg.style.color = 'var(--danger)';
+    }
+  };
+  reader.readAsText(file);
+}
 
-  <!-- ===== RODAPÉ ===== -->
-  <footer>
-    <p class="nome">💕 Sempre Perto</p>
-    <p>Para quem ama, cuida e gosta de sentir que o outro está bem.</p>
-    <!-- Slogan do final -->
-    <p class="slogan">Mesmo quando estamos longe.</p>
-  </footer>
+Object.assign(window, {showHome, showHistorico, showCadastro, saveExam, showExam, saveExamEdit,
+  saveResult, editResultPrompt, shareExam, shareUltimos, showPerfil, saveProfile, showComoUsar,
+  showBackup, exportBackup, openMenu, closeMenu});
 
-</main>
+boot();
+</script>
 </body>
 </html>
