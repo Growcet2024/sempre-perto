@@ -48,10 +48,13 @@ header.top{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
 .flat-list{border-top:1px solid var(--border);}
 .flat-item{padding:13px 2px;border-bottom:1px solid var(--border);cursor:pointer;
   display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+.flat-item{flex-direction:row;align-items:flex-start;}
+.flat-item .left{min-width:0;}
 .flat-item .name{font-weight:500;font-size:15px;}
+.flat-item .ref{font-size:12px;color:var(--text2);margin-top:2px;}
 .flat-item .right{text-align:right;flex-shrink:0;}
 .flat-item .value{font-size:15px;}
-.flat-item .date{font-size:12px;color:var(--text2);}
+.flat-item .date{font-size:12px;color:var(--text2);margin-top:2px;}
 .empty{color:var(--text2);text-align:center;padding:40px 16px;font-size:14px;}
 label{display:block;font-size:13px;color:var(--text2);margin:14px 0 6px;}
 input[type=text],input[type=date],input[type=number]{
@@ -63,11 +66,16 @@ input[type=text],input[type=date],input[type=number]{
   display:flex;justify-content:space-between;align-items:center;}
 .result-row .date{font-size:13px;color:var(--text2);}
 .result-row .value{font-weight:500;font-size:16px;}
-.tag{display:inline-block;font-size:12px;font-weight:500;padding:2px 8px;border-radius:6px;margin-left:6px;}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;margin-top:3px;}
 .tag-alto{background:#FBEAE8;color:#B23A2E;}
-.tag-baixo{background:#FFF4DE;color:#9A6B10;}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag-alto{background:#3A2320;color:#F2A69C;}}
+.tag-baixo{background:#FFF1DE;color:#A05A00;}
+.tag-normal{background:#E6F4EC;color:#2E7D5B;}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tag-alto{background:#3A2320;color:#F2A69C;}
+  :root:not([data-theme="light"]) .tag-baixo{background:#3A2A14;color:#F2C089;}
+  :root:not([data-theme="light"]) .tag-normal{background:#1E3327;color:#8FD1AC;}}
 :root[data-theme="dark"] .tag-alto{background:#3A2320;color:#F2A69C;}
+:root[data-theme="dark"] .tag-baixo{background:#3A2A14;color:#F2C089;}
+:root[data-theme="dark"] .tag-normal{background:#1E3327;color:#8FD1AC;}
 .edit-link{font-size:13px;color:var(--btn-dark);background:none;border:none;cursor:pointer;padding:4px;}
 .tabs{display:flex;gap:8px;margin-bottom:16px;}
 .tab{flex:1;padding:10px;text-align:center;border-radius:10px;background:var(--card);border:1px solid var(--border);
@@ -158,7 +166,7 @@ function compareResult(value, reference){
   if(v===null) return null;
   if(range.max!==undefined && v>range.max) return 'alto';
   if(range.min!==undefined && v<range.min) return 'baixo';
-  return null;
+  return 'normal';
 }
 
 const app = document.getElementById('app');
@@ -177,7 +185,7 @@ function headerHtml(){
     <h1 class="app-title">Meus Exames</h1>
     <header class="top">
       <div class="avatar">${av}</div>
-      <div class="who"><div class="name">${escapeHtml(profile.name||'Sem nome cadastrado')}</div></div>
+      <div class="who"><div class="name">${profile.name? escapeHtml(profile.name)+' - ID: '+escapeHtml(profile.userId) : 'Sem nome cadastrado'}</div></div>
       <button class="menu-btn" onclick="openMenu()" aria-label="Menu">&#9776;</button>
     </header>
     <p class="offline-note">App funciona sem internet</p>
@@ -217,12 +225,19 @@ async function showHome(filter){
   const filtered = f ? rows.filter(r=>r.ex.name.toLowerCase().includes(f)) : rows;
 
   const itemsHtml = filtered.length ? `<div class="flat-list">` + filtered.map(r=>{
-    const comp = compareResult(r.last.value, r.ex.reference);
-    const tag = comp ? `<span class="tag tag-${comp}">${comp}</span>` : '';
+    const comp = compareResult(r.last.value, r.ex.reference) || 'normal';
+    const tag = `<div><span class="tag tag-${comp}">${comp==='alto'?'Alto':comp==='baixo'?'Baixo':'Normal'}</span></div>`;
     return `
     <div class="flat-item" onclick="showExam(${r.ex.id})">
-      <div class="name">${escapeHtml(r.ex.name)}</div>
-      <div class="right"><div class="value">${escapeHtml(r.last.value)}${tag}</div><div class="date">${fmtDate(r.last.date)}</div></div>
+      <div class="left">
+        <div class="name">${escapeHtml(r.ex.name)}</div>
+        <div class="ref">Ref: ${escapeHtml(r.ex.reference||'-')}</div>
+      </div>
+      <div class="right">
+        <div class="value">${escapeHtml(r.last.value)}</div>
+        <div class="date">${fmtDate(r.last.date)}</div>
+        ${tag}
+      </div>
     </div>`;
   }).join('') + `</div>` : `<div class="empty">${rows.length? 'Nenhum exame encontrado.' : 'Nenhum resultado lançado ainda. Use o menu para cadastrar um exame.'}</div>`;
 
@@ -233,6 +248,7 @@ async function showHome(filter){
     <input type="text" class="search" id="searchBox" placeholder="Buscar exame..." value="${escapeHtml(filter||'')}">
     <p class="list-label">Resultados mais recentes</p>
     ${itemsHtml}
+    ${filtered.length? `<button class="icon-btn" style="width:100%;margin-top:12px;" onclick="shareUltimos()">Compartilhar</button>` : ''}
   `);
   window._ultimosRows = filtered;
   const box = document.getElementById('searchBox');
@@ -312,11 +328,11 @@ async function showExam(examId, editMode){
   `;
 
   const resultsHtml = results.length ? `<div class="flat-list">` + results.map(r=>{
-    const comp = compareResult(r.value, ex.reference);
-    const tag = comp ? `<span class="tag tag-${comp}">${comp}</span>` : '';
+    const comp = compareResult(r.value, ex.reference) || 'normal';
+    const tagLabel = comp==='alto'?'Alto':comp==='baixo'?'Baixo':'Normal';
     return `
     <div class="result-row">
-      <div><div class="value">${escapeHtml(r.value)}${tag}</div><div class="date">${fmtDate(r.date)} &middot; Ref: ${escapeHtml(ex.reference||'-')}</div></div>
+      <div><div class="value">${escapeHtml(r.value)} <span class="tag tag-${comp}">${tagLabel}</span></div><div class="date">${fmtDate(r.date)} &middot; Ref: ${escapeHtml(ex.reference||'-')}</div></div>
       <button class="edit-link" onclick="editResultPrompt(${r.id},${examId})">editar</button>
     </div>`;
   }).join('') + `</div>` : `<div class="empty">Nenhum resultado lançado para este exame.</div>`;
@@ -369,7 +385,7 @@ function makeA4Canvas(title, lines){
     ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,W,H);
     ctx.fillStyle='#1F2D27'; ctx.font='500 28px Arial'; ctx.fillText('Meus Exames', 50, 60);
     ctx.font='400 15px Arial'; ctx.fillStyle='#6B7D74';
-    ctx.fillText(profile.name+(profile.userId? ' (ID: '+profile.userId+')':''), 50, 85);
+    ctx.fillText(profile.name+(profile.userId? ' - ID: '+profile.userId:''), 50, 85);
     ctx.font='500 22px Arial'; ctx.fillStyle='#1F2D27';
     ctx.fillText(title + (pages.length>1? ' — página '+(idx+1)+'/'+pages.length : ''), 50, 130);
     ctx.strokeStyle='#D9E6DD'; ctx.beginPath(); ctx.moveTo(50,150); ctx.lineTo(W-50,150); ctx.stroke();
@@ -424,7 +440,7 @@ function showPerfil(firstTime){
     <label>Nome</label>
     <input type="text" id="sName" value="${escapeHtml(profile.name)}" placeholder="Digite seu nome">
     <div id="sErr" class="err hide">Digite seu nome para continuar</div>
-    ${profile.userId? `<p class="muted" style="margin-top:10px;">ID: ${escapeHtml(profile.userId)} (não muda ao editar o nome)</p>` : ''}
+    ${profile.userId? `<p class="muted" style="margin-top:10px;">${escapeHtml(profile.name)} - ID: ${escapeHtml(profile.userId)} (não muda ao editar o nome)</p>` : ''}
     <div class="row" style="margin-top:16px;">
       ${firstTime? '' : `<button class="btn secondary" onclick="showHome()">Cancelar</button>`}
       <button class="btn" onclick="saveProfile()">Salvar</button>
