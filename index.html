@@ -28,7 +28,11 @@ body{
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 .wrap{max-width:480px;margin:0 auto;padding:16px;min-height:100%;}
-h1.app-title{font-size:19px;font-weight:600;margin:0 0 10px;}
+.title-row{display:flex;align-items:center;gap:8px;margin:0 0 10px;}
+.app-icon{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:18px;flex-shrink:0;}
+.app-icon img{width:100%;height:100%;object-fit:contain;border-radius:6px;}
+h1.app-title{font-size:19px;font-weight:600;margin:0;}
 header.top{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
 .avatar{width:42px;height:42px;border-radius:50%;background:var(--btn);color:#fff;border:none;
   display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0;font-size:16px;font-weight:600;}
@@ -47,8 +51,11 @@ header.top{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
   color:var(--text);font-size:15px;margin-bottom:18px;}
 .list-label{font-size:13px;color:var(--text2);margin:0 0 10px;}
 .flat-list{border-top:1px solid var(--border);}
-.flat-item{padding:13px 2px;border-bottom:1px solid var(--border);cursor:pointer;
+.flat-item{padding:8px 2px;border-bottom:1px solid var(--border);cursor:pointer;
   display:flex;justify-content:space-between;align-items:baseline;gap:10px;}
+.flat-item-stack{padding:9px 2px;border-bottom:1px solid var(--border);cursor:pointer;}
+.flat-item-stack .name{font-weight:500;font-size:15px;}
+.flat-item-stack .ref{font-size:13px;color:var(--text2);margin-top:2px;}
 .flat-item{flex-direction:row;align-items:flex-start;}
 .flat-item .left{min-width:0;}
 .flat-item .name{font-weight:500;font-size:15px;}
@@ -67,7 +74,7 @@ input[type=text],input[type=date],input[type=number]{
   display:flex;justify-content:space-between;align-items:center;}
 .result-row .date{font-size:13px;color:var(--text2);}
 .result-row .value{font-weight:500;font-size:16px;}
-.tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;margin-top:3px;}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;margin-left:4px;vertical-align:middle;}
 .tag-alto{background:#FBEAE8;color:#B23A2E;}
 .tag-baixo{background:#FFF1DE;color:#A05A00;}
 .tag-normal{background:#E6F4EC;color:#2E7D5B;}
@@ -170,6 +177,15 @@ function compareResult(value, reference){
   return 'normal';
 }
 
+/* Cole aqui o código base64 do ícone do app (ex: 'data:image/png;base64,iVBORw0...').
+   Enquanto estiver vazio, aparece um símbolo provisório no lugar. */
+const APP_ICON_BASE64 = '';
+function appIconHtml(){
+  return APP_ICON_BASE64
+    ? `<div class="app-icon"><img src="${APP_ICON_BASE64}"></div>`
+    : `<div class="app-icon">🩺</div>`;
+}
+
 const app = document.getElementById('app');
 function render(html){ app.innerHTML = html; }
 
@@ -187,7 +203,7 @@ async function boot(){
 function headerHtml(){
   const av = profile.avatar ? `<img src="${profile.avatar}">` : initials(profile.name);
   return `
-    <h1 class="app-title">Meus Exames</h1>
+    <div class="title-row">${appIconHtml()}<h1 class="app-title">Meus Exames</h1></div>
     <header class="top">
       <div class="avatar">${av}</div>
       <div class="who"><div class="name">${profile.name? escapeHtml(profile.name) : 'Sem nome cadastrado'}</div>${profile.userId? `<div class="idline">ID: ${escapeHtml(profile.userId)}</div>` : ''}</div>
@@ -231,18 +247,11 @@ async function showHome(filter){
 
   const itemsHtml = filtered.length ? `<div class="flat-list">` + filtered.map(r=>{
     const comp = compareResult(r.last.value, r.ex.reference) || 'normal';
-    const tag = `<div><span class="tag tag-${comp}">${comp==='alto'?'Alto':comp==='baixo'?'Baixo':'Normal'}</span></div>`;
+    const tag = `<span class="tag tag-${comp}">${comp==='alto'?'Alto':comp==='baixo'?'Baixo':'Normal'}</span>`;
     return `
-    <div class="flat-item" onclick="showExam(${r.ex.id})">
-      <div class="left">
-        <div class="name">${escapeHtml(r.ex.name)}</div>
-        <div class="ref">Ref: ${escapeHtml(r.ex.reference||'-')}</div>
-      </div>
-      <div class="right">
-        <div class="value">${escapeHtml(r.last.value)}</div>
-        <div class="date">${fmtDate(r.last.date)}</div>
-        ${tag}
-      </div>
+    <div class="flat-item-stack" onclick="showExam(${r.ex.id})">
+      <div class="name">${escapeHtml(r.ex.name)}</div>
+      <div class="ref">${escapeHtml(r.ex.reference||'-')} &middot; ${fmtDate(r.last.date)} &middot; ${escapeHtml(r.last.value)} ${tag}</div>
     </div>`;
   }).join('') + `</div>` : `<div class="empty">${rows.length? 'Nenhum exame encontrado.' : 'Nenhum resultado lançado ainda. Use o menu para cadastrar um exame.'}</div>`;
 
@@ -380,28 +389,40 @@ async function editResultPrompt(resultId, examId){
 
 function makeA4Canvas(title, lines){
   const W=794, H=1123;
-  const rowH=40, headerH=188, maxRowsPerPage = Math.floor((H-headerH-60)/rowH);
+  const rowH=34, headerH=190, tableTop=150;
+  const cols = [ {x:50,  w:190, label:'Exame'}, {x:240, w:85,  label:'Data'},
+                 {x:325, w:185, label:'Referência'}, {x:510, w:95,  label:'Resultado'},
+                 {x:605, w:140, label:'Status'} ];
+  const maxRowsPerPage = Math.floor((H-headerH-60)/rowH);
   const pages = [];
   for(let i=0;i<lines.length;i+=maxRowsPerPage) pages.push(lines.slice(i,i+maxRowsPerPage));
   if(pages.length===0) pages.push([]);
+  const statusColor = s => s==='Alto' ? '#B23A2E' : s==='Baixo' ? '#A05A00' : '#2E7D5B';
   return pages.map((pageLines, idx)=>{
     const c = document.createElement('canvas'); c.width=W; c.height=H;
     const ctx = c.getContext('2d');
     ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,W,H);
-    ctx.fillStyle='#1F2D27'; ctx.font='500 28px Arial'; ctx.fillText('Meus Exames', 50, 60);
-    ctx.font='400 15px Arial'; ctx.fillStyle='#6B7D74';
-    ctx.fillText(profile.name, 50, 85);
-    if(profile.userId){ ctx.fillText('ID: '+profile.userId, 50, 104); }
-    ctx.font='500 22px Arial'; ctx.fillStyle='#1F2D27';
-    ctx.fillText(title + (pages.length>1? ' — página '+(idx+1)+'/'+pages.length : ''), 50, 148);
-    ctx.strokeStyle='#D9E6DD'; ctx.beginPath(); ctx.moveTo(50,168); ctx.lineTo(W-50,168); ctx.stroke();
-    let y = headerH;
+    ctx.fillStyle='#1F2D27'; ctx.font='500 24px Arial'; ctx.fillText('Meus Exames', 50, 50);
+    ctx.font='400 14px Arial'; ctx.fillStyle='#6B7D74';
+    const now=new Date(); const p=n=>String(n).padStart(2,'0');
+    const genDate = p(now.getDate())+'/'+p(now.getMonth()+1)+'/'+now.getFullYear();
+    ctx.fillText(profile.name+(profile.userId? ' - ID: '+profile.userId:'')+' - Gerado em '+genDate, 50, 76);
+    ctx.font='500 19px Arial'; ctx.fillStyle='#1F2D27';
+    ctx.fillText(title + (pages.length>1? ' — página '+(idx+1)+'/'+pages.length : ''), 50, 112);
+    ctx.strokeStyle='#D9E6DD'; ctx.beginPath(); ctx.moveTo(50,128); ctx.lineTo(W-50,128); ctx.stroke();
+    ctx.font='600 13px Arial'; ctx.fillStyle='#6B7D74';
+    cols.forEach(col=>ctx.fillText(col.label, col.x, tableTop));
+    ctx.strokeStyle='#D9E6DD'; ctx.beginPath(); ctx.moveTo(50,tableTop+12); ctx.lineTo(W-50,tableTop+12); ctx.stroke();
+    let y = tableTop+36;
     pageLines.forEach(line=>{
-      ctx.fillStyle='#1F2D27'; ctx.font='500 16px Arial'; ctx.fillText(line.name, 50, y);
-      ctx.fillStyle='#1F2D27'; ctx.font='400 16px Arial'; ctx.fillText(line.value, 330, y);
-      ctx.fillStyle='#6B7D74'; ctx.font='400 13px Arial'; ctx.fillText(line.sub, 330, y+18);
-      ctx.fillStyle='#6B7D74'; ctx.font='400 14px Arial';
-      ctx.textAlign='right'; ctx.fillText(line.date, W-50, y); ctx.textAlign='left';
+      ctx.font='400 14px Arial'; ctx.fillStyle='#1F2D27';
+      ctx.fillText(line.exame, cols[0].x, y, cols[0].w);
+      ctx.fillText(line.data, cols[1].x, y, cols[1].w);
+      ctx.fillText(line.referencia, cols[2].x, y, cols[2].w);
+      ctx.fillText(line.resultado, cols[3].x, y, cols[3].w);
+      ctx.fillStyle=statusColor(line.status); ctx.font='600 14px Arial';
+      ctx.fillText(line.status, cols[4].x, y);
+      ctx.strokeStyle='#EFF4F1'; ctx.beginPath(); ctx.moveTo(50,y+12); ctx.lineTo(W-50,y+12); ctx.stroke();
       y += rowH;
     });
     return c;
@@ -417,19 +438,42 @@ async function downloadCanvas(canvas, filename){
     a.href = URL.createObjectURL(blob); a.download = filename; a.click();
   }
 }
+async function shareCanvases(canvases, baseFilename, title){
+  const files = [];
+  for(let i=0;i<canvases.length;i++){
+    const blob = await new Promise(res=>canvases[i].toBlob(res,'image/png'));
+    const filename = baseFilename+(canvases.length>1? '_p'+(i+1):'')+'.png';
+    files.push(new File([blob], filename, {type:'image/png'}));
+  }
+  if(navigator.share && navigator.canShare && navigator.canShare({files})){
+    try{ await navigator.share({files, title}); return; }
+    catch(e){ if(e.name==='AbortError') return; }
+  }
+  try{
+    for(let i=0;i<canvases.length;i++) await downloadCanvas(canvases[i], files[i].name);
+  }catch(e){ /* última tentativa: ignora silenciosamente se também falhar */ }
+}
 async function shareExam(examId){
   const ex = await getOne('exams', examId);
   let results = await getAll('results');
   results = results.filter(r=>r.examId===examId).sort((a,b)=>b.date.localeCompare(a.date));
-  const lines = results.map(r=>({name:ex.name, value:r.value, sub:'Ref: '+(ex.reference||'-'), date:fmtDate(r.date)}));
+  const lines = results.map(r=>{
+    const comp = compareResult(r.value, ex.reference) || 'normal';
+    return {exame:ex.name, data:fmtDate(r.date), referencia:ex.reference||'-', resultado:r.value,
+      status: comp==='alto'?'Alto':comp==='baixo'?'Baixo':'Normal'};
+  });
   const canvases = makeA4Canvas(ex.name, lines);
-  for(let i=0;i<canvases.length;i++) await downloadCanvas(canvases[i], 'MeusExames_'+ex.name.replace(/\s+/g,'_')+'_p'+(i+1)+'.png');
+  await shareCanvases(canvases, 'MeusExames_'+ex.name.replace(/\s+/g,'_'), ex.name);
 }
 async function shareUltimos(){
   const rows = window._ultimosRows || [];
-  const lines = rows.map(r=>({name:r.ex.name, value:r.last.value, sub:'Ref: '+(r.ex.reference||'-'), date:fmtDate(r.last.date)}));
+  const lines = rows.map(r=>{
+    const comp = compareResult(r.last.value, r.ex.reference) || 'normal';
+    return {exame:r.ex.name, data:fmtDate(r.last.date), referencia:r.ex.reference||'-', resultado:r.last.value,
+      status: comp==='alto'?'Alto':comp==='baixo'?'Baixo':'Normal'};
+  });
   const canvases = makeA4Canvas('Últimos resultados', lines);
-  for(let i=0;i<canvases.length;i++) await downloadCanvas(canvases[i], 'MeusExames_Ultimos_p'+(i+1)+'.png');
+  await shareCanvases(canvases, 'MeusExames_Ultimos', 'Últimos resultados');
 }
 
 function showPerfil(firstTime){
