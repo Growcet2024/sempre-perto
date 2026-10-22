@@ -35,6 +35,7 @@ header.top{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
 .avatar img{width:100%;height:100%;object-fit:cover;}
 .who{flex:1;min-width:0;}
 .who .name{font-weight:500;font-size:16px;}
+.who .idline{font-size:12px;color:var(--text2);margin-top:2px;}
 .menu-btn{background:none;border:none;font-size:24px;color:var(--text);cursor:pointer;padding:6px;line-height:1;}
 .offline-note{font-size:13px;color:var(--text2);margin:2px 0 18px;}
 .btn{display:block;width:100%;background:var(--btn);color:#fff;border:none;border-radius:10px;
@@ -128,12 +129,12 @@ if(typeof claude !== 'undefined' && claude.use){
   claude.use('downloads').then(d=>downloadsCap=d).catch(()=>{});
 }
 
-function genId(name){
+function genId(){
   const now=new Date();
   const p=n=>String(n).padStart(2,'0');
-  const stamp = p(now.getDate())+p(now.getMonth()+1)+String(now.getFullYear()).slice(2);
+  const stamp = String(now.getFullYear()).slice(2)+p(now.getMonth()+1)+p(now.getDate());
   const rand = Math.random().toString(36).slice(2,6);
-  return (name.split(' ')[0]||'Usuario')+'-'+stamp+'d'+rand;
+  return stamp+rand;
 }
 function fmtDate(iso){
   if(!iso) return '';
@@ -176,6 +177,10 @@ async function boot(){
   await openDB();
   profile = await getOne('profile','main');
   if(!profile){ profile = {id:'main', name:'', userId:'', avatar:null}; }
+  if(profile.userId && !/^\d{6}[a-z0-9]{4}$/.test(profile.userId)){
+    profile.userId = genId();
+    await put('profile', profile);
+  }
   showHome();
 }
 
@@ -185,7 +190,7 @@ function headerHtml(){
     <h1 class="app-title">Meus Exames</h1>
     <header class="top">
       <div class="avatar">${av}</div>
-      <div class="who"><div class="name">${profile.name? escapeHtml(profile.name)+' - ID: '+escapeHtml(profile.userId) : 'Sem nome cadastrado'}</div></div>
+      <div class="who"><div class="name">${profile.name? escapeHtml(profile.name) : 'Sem nome cadastrado'}</div>${profile.userId? `<div class="idline">ID: ${escapeHtml(profile.userId)}</div>` : ''}</div>
       <button class="menu-btn" onclick="openMenu()" aria-label="Menu">&#9776;</button>
     </header>
     <p class="offline-note">App funciona sem internet</p>
@@ -375,7 +380,7 @@ async function editResultPrompt(resultId, examId){
 
 function makeA4Canvas(title, lines){
   const W=794, H=1123;
-  const rowH=40, headerH=170, maxRowsPerPage = Math.floor((H-headerH-60)/rowH);
+  const rowH=40, headerH=188, maxRowsPerPage = Math.floor((H-headerH-60)/rowH);
   const pages = [];
   for(let i=0;i<lines.length;i+=maxRowsPerPage) pages.push(lines.slice(i,i+maxRowsPerPage));
   if(pages.length===0) pages.push([]);
@@ -385,10 +390,11 @@ function makeA4Canvas(title, lines){
     ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,W,H);
     ctx.fillStyle='#1F2D27'; ctx.font='500 28px Arial'; ctx.fillText('Meus Exames', 50, 60);
     ctx.font='400 15px Arial'; ctx.fillStyle='#6B7D74';
-    ctx.fillText(profile.name+(profile.userId? ' - ID: '+profile.userId:''), 50, 85);
+    ctx.fillText(profile.name, 50, 85);
+    if(profile.userId){ ctx.fillText('ID: '+profile.userId, 50, 104); }
     ctx.font='500 22px Arial'; ctx.fillStyle='#1F2D27';
-    ctx.fillText(title + (pages.length>1? ' — página '+(idx+1)+'/'+pages.length : ''), 50, 130);
-    ctx.strokeStyle='#D9E6DD'; ctx.beginPath(); ctx.moveTo(50,150); ctx.lineTo(W-50,150); ctx.stroke();
+    ctx.fillText(title + (pages.length>1? ' — página '+(idx+1)+'/'+pages.length : ''), 50, 148);
+    ctx.strokeStyle='#D9E6DD'; ctx.beginPath(); ctx.moveTo(50,168); ctx.lineTo(W-50,168); ctx.stroke();
     let y = headerH;
     pageLines.forEach(line=>{
       ctx.fillStyle='#1F2D27'; ctx.font='500 16px Arial'; ctx.fillText(line.name, 50, y);
@@ -440,7 +446,7 @@ function showPerfil(firstTime){
     <label>Nome</label>
     <input type="text" id="sName" value="${escapeHtml(profile.name)}" placeholder="Digite seu nome">
     <div id="sErr" class="err hide">Digite seu nome para continuar</div>
-    ${profile.userId? `<p class="muted" style="margin-top:10px;">${escapeHtml(profile.name)} - ID: ${escapeHtml(profile.userId)} (não muda ao editar o nome)</p>` : ''}
+    ${profile.userId? `<p class="muted" style="margin-top:10px;">${escapeHtml(profile.name)}<br>ID: ${escapeHtml(profile.userId)} (não muda ao editar o nome)</p>` : ''}
     <div class="row" style="margin-top:16px;">
       ${firstTime? '' : `<button class="btn secondary" onclick="showHome()">Cancelar</button>`}
       <button class="btn" onclick="saveProfile()">Salvar</button>
@@ -458,7 +464,7 @@ async function saveProfile(){
   const err = document.getElementById('sErr');
   if(!name){ err.classList.remove('hide'); return; }
   profile.name = name;
-  if(!profile.userId) profile.userId = genId(name);
+  if(!profile.userId) profile.userId = genId();
   await put('profile', profile);
   showHome();
 }
