@@ -56,6 +56,9 @@ header.top{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
 .flat-item-stack{padding:9px 2px;border-bottom:1px solid var(--border);cursor:pointer;}
 .flat-item-stack .name{font-weight:500;font-size:15px;}
 .flat-item-stack .ref{font-size:13px;color:var(--text2);margin-top:2px;}
+.cols{display:grid;grid-template-columns:1.5fr 1fr .8fr .8fr;gap:6px;align-items:center;margin-top:3px;font-size:13px;color:var(--text2);}
+.cols span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cols .res{color:var(--text);}
 .flat-item{flex-direction:row;align-items:flex-start;}
 .flat-item .left{min-width:0;}
 .flat-item .name{font-weight:500;font-size:15px;}
@@ -186,6 +189,9 @@ function appIconHtml(){
     : `<div class="app-icon">🩺</div>`;
 }
 
+const appIconImg = new Image();
+if(APP_ICON_BASE64) appIconImg.src = APP_ICON_BASE64;
+
 const app = document.getElementById('app');
 function render(html){ app.innerHTML = html; }
 
@@ -251,7 +257,7 @@ async function showHome(filter){
     return `
     <div class="flat-item-stack" onclick="showExam(${r.ex.id})">
       <div class="name">${escapeHtml(r.ex.name)}</div>
-      <div class="ref">${escapeHtml(r.ex.reference||'-')} &middot; ${fmtDate(r.last.date)} &middot; ${escapeHtml(r.last.value)} ${tag}</div>
+      <div class="cols"><span>${escapeHtml(r.ex.reference||'-')}</span><span>${fmtDate(r.last.date)}</span><span class="res">${escapeHtml(r.last.value)}</span><span>${tag}</span></div>
     </div>`;
   }).join('') + `</div>` : `<div class="empty">${rows.length? 'Nenhum exame encontrado.' : 'Nenhum resultado lançado ainda. Use o menu para cadastrar um exame.'}</div>`;
 
@@ -403,6 +409,7 @@ function makeA4Canvas(title, lines){
     const ctx = c.getContext('2d');
     ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,W,H);
     ctx.fillStyle='#1F2D27'; ctx.font='500 24px Arial'; ctx.fillText('Meus Exames', 50, 50);
+    if(APP_ICON_BASE64 && appIconImg.complete && appIconImg.naturalWidth){ ctx.drawImage(appIconImg, W-50-60, 28, 60, 60); }
     ctx.font='400 14px Arial'; ctx.fillStyle='#6B7D74';
     const now=new Date(); const p=n=>String(n).padStart(2,'0');
     const genDate = p(now.getDate())+'/'+p(now.getMonth()+1)+'/'+now.getFullYear();
