@@ -46,7 +46,9 @@ header.top{display:flex;align-items:center;gap:12px;margin-bottom:4px;}
   padding:14px;font-size:16px;font-weight:500;margin-bottom:12px;cursor:pointer;text-align:center;}
 .btn:active{background:var(--btn-dark);}
 .btn.secondary{background:none;color:var(--btn-dark);border:1px solid var(--border);}
-.back{background:none;border:none;color:var(--text2);font-size:15px;cursor:pointer;padding:8px 0;margin-bottom:8px;}
+.back{background:none;border:none;color:var(--text2);font-size:15px;cursor:pointer;padding:8px 0;margin-bottom:8px;
+  display:flex;align-items:center;gap:4px;}
+.back svg{width:20px;height:20px;flex-shrink:0;}
 .search{width:100%;padding:11px 12px;border:1px solid var(--border);border-radius:9px;background:var(--card);
   color:var(--text);font-size:15px;margin-bottom:18px;}
 .list-label{font-size:13px;color:var(--text2);margin:0 0 10px;}
@@ -170,13 +172,20 @@ function parseReference(ref){
   if(nums.length>=2) return {min: Math.min(nums[0],nums[1]), max: Math.max(nums[0],nums[1])};
   return null;
 }
-function compareResult(value, reference){
-  const range = parseReference(reference);
-  if(!range) return null;
+function refLabel(ex){
+  if(ex.min && ex.max) return ex.min+' a '+ex.max;
+  if(ex.max) return 'até '+ex.max;
+  if(ex.min) return 'acima de '+ex.min;
+  return '-';
+}
+function compareResult(value, ex){
   const v = firstNumber(value);
   if(v===null) return null;
-  if(range.max!==undefined && v>range.max) return 'alto';
-  if(range.min!==undefined && v<range.min) return 'baixo';
+  const minN = ex.min ? firstNumber(ex.min) : null;
+  const maxN = ex.max ? firstNumber(ex.max) : null;
+  if(minN===null && maxN===null) return null;
+  if(maxN!==null && v>maxN) return 'alto';
+  if(minN!==null && v<minN) return 'baixo';
   return 'normal';
 }
 
@@ -202,6 +211,15 @@ async function boot(){
   if(profile.userId && !/^\d{6}[a-z0-9]{4}$/.test(profile.userId)){
     profile.userId = genId();
     await put('profile', profile);
+  }
+  const exams = await getAll('exams');
+  for(const ex of exams){
+    if(ex.min===undefined && ex.max===undefined){
+      const range = parseReference(ex.reference);
+      ex.min = range && range.min!==undefined ? String(range.min) : '';
+      ex.max = range && range.max!==undefined ? String(range.max) : '';
+      await put('exams', ex);
+    }
   }
   showHome();
 }
@@ -252,12 +270,12 @@ async function showHome(filter){
   const filtered = f ? rows.filter(r=>r.ex.name.toLowerCase().includes(f)) : rows;
 
   const itemsHtml = filtered.length ? `<div class="flat-list">` + filtered.map(r=>{
-    const comp = compareResult(r.last.value, r.ex.reference) || 'normal';
+    const comp = compareResult(r.last.value, r.ex) || 'normal';
     const tag = `<span class="tag tag-${comp}">${comp==='alto'?'Alto':comp==='baixo'?'Baixo':'Normal'}</span>`;
     return `
     <div class="flat-item-stack" onclick="showExam(${r.ex.id})">
       <div class="name">${escapeHtml(r.ex.name)}</div>
-      <div class="cols"><span>${escapeHtml(r.ex.reference||'-')}</span><span>${fmtDate(r.last.date)}</span><span class="res">${escapeHtml(r.last.value)}</span><span>${tag}</span></div>
+      <div class="cols"><span>${escapeHtml(refLabel(r.ex))}</span><span>${fmtDate(r.last.date)}</span><span class="res">${escapeHtml(r.last.value)}</span><span>${tag}</span></div>
     </div>`;
   }).join('') + `</div>` : `<div class="empty">${rows.length? 'Nenhum exame encontrado.' : 'Nenhum resultado lançado ainda. Use o menu para cadastrar um exame.'}</div>`;
 
@@ -289,7 +307,7 @@ async function showHistorico(filter){
     </div>`).join('') + `</div>` : `<div class="empty">${exams.length? 'Nenhum exame encontrado.' : 'Nenhum exame cadastrado ainda.'}</div>`;
 
   render(`
-    <button class="back" onclick="showHome()">&larr; Voltar</button>
+    <button class="back" onclick="showHome()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>Voltar</button>
     <h1 class="app-title">Histórico</h1>
     <input type="text" class="search" id="searchBox2" placeholder="Buscar exame..." value="${escapeHtml(filter||'')}">
     ${itemsHtml}
@@ -301,42 +319,77 @@ async function showHistorico(filter){
 
 function showCadastro(){
   render(`
-    <button class="back" onclick="showHome()">&larr; Voltar</button>
+    <button class="back" onclick="showHome()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>Voltar</button>
     <h1 class="app-title">Cadastrar novo</h1>
     <label>Nome do exame</label>
     <input type="text" id="cName" placeholder="Ex: Colesterol Total">
-    <label>Valor de referência</label>
-    <input type="text" id="cRef" placeholder="Ex: 150 a 200 mg/dL">
+    <div class="row">
+      <div>
+        <label>Mínimo (opcional)</label>
+        <input type="text" id="cMin" placeholder="Ex: 150 mg/dL">
+      </div>
+      <div>
+        <label>Máximo (opcional)</label>
+        <input type="text" id="cMax" placeholder="Ex: 200 mg/dL">
+      </div>
+    </div>
     <div id="cErr" class="err hide">Preencha o nome do exame</div>
     <button class="btn" style="margin-top:16px;" onclick="saveExam()">Salvar</button>
   `);
 }
 async function saveExam(){
   const name = document.getElementById('cName').value.trim();
-  const reference = document.getElementById('cRef').value.trim();
+  const min = document.getElementById('cMin').value.trim();
+  const max = document.getElementById('cMax').value.trim();
   const err = document.getElementById('cErr');
   if(!name){ err.classList.remove('hide'); return; }
   err.classList.add('hide');
-  const id = await put('exams', {name, reference});
+  const id = await put('exams', {name, min, max});
   showExam(id);
 }
 
-async function showExam(examId, editMode){
+async function showExam(examId, editMode, editResultId){
   const ex = await getOne('exams', examId);
   if(!ex){ showHistorico(); return; }
   let results = await getAll('results');
   results = results.filter(r=>r.examId===examId).sort((a,b)=>b.date.localeCompare(a.date));
+  const editingResult = editResultId ? results.find(r=>r.id===editResultId) : null;
 
-  const editBlock = editMode ? `
+  let editBlock;
+  if(editMode){
+    editBlock = `
     <label>Nome do exame</label>
     <input type="text" id="eName" value="${escapeHtml(ex.name)}">
-    <label>Valor de referência</label>
-    <input type="text" id="eRef" value="${escapeHtml(ex.reference||'')}">
+    <div class="row">
+      <div>
+        <label>Mínimo (opcional)</label>
+        <input type="text" id="eMin" value="${escapeHtml(ex.min||'')}">
+      </div>
+      <div>
+        <label>Máximo (opcional)</label>
+        <input type="text" id="eMax" value="${escapeHtml(ex.max||'')}">
+      </div>
+    </div>
     <div class="row" style="margin-top:14px;">
       <button class="btn secondary" onclick="showExam(${examId})">Cancelar</button>
       <button class="btn" onclick="saveExamEdit(${examId})">Salvar</button>
     </div>
-  ` : `
+    `;
+  } else if(editingResult){
+    editBlock = `
+    <div class="section-title">Editar resultado</div>
+    <label>Data de recebimento</label>
+    <input type="date" id="rDate" value="${escapeHtml(editingResult.date)}">
+    <label>Resultado</label>
+    <input type="text" id="rValue" value="${escapeHtml(editingResult.value)}">
+    <div id="rErr" class="err hide">Preencha data e resultado</div>
+    <div class="row" style="margin-top:14px;">
+      <button class="btn secondary" onclick="showExam(${examId})">Cancelar</button>
+      <button class="btn" onclick="saveResult(${examId},${editResultId})">Salvar</button>
+    </div>
+    `;
+  } else {
+    editBlock = `
     <div class="section-title">Lançar novo resultado</div>
     <label>Data de recebimento</label>
     <input type="date" id="rDate">
@@ -345,22 +398,23 @@ async function showExam(examId, editMode){
     <div id="rErr" class="err hide">Preencha data e resultado</div>
     <button class="btn" style="margin-top:14px;" onclick="saveResult(${examId})">Lançar</button>
     <button class="icon-btn" style="margin-top:4px;" onclick="showExam(${examId},true)">Editar nome / referência</button>
-  `;
+    `;
+  }
 
   const resultsHtml = results.length ? `<div class="flat-list">` + results.map(r=>{
-    const comp = compareResult(r.value, ex.reference) || 'normal';
+    const comp = compareResult(r.value, ex) || 'normal';
     const tagLabel = comp==='alto'?'Alto':comp==='baixo'?'Baixo':'Normal';
     return `
     <div class="result-row">
-      <div><div class="value">${escapeHtml(r.value)} <span class="tag tag-${comp}">${tagLabel}</span></div><div class="date">${fmtDate(r.date)} &middot; Ref: ${escapeHtml(ex.reference||'-')}</div></div>
-      <button class="edit-link" onclick="editResultPrompt(${r.id},${examId})">editar</button>
+      <div><div class="value">${escapeHtml(r.value)} <span class="tag tag-${comp}">${tagLabel}</span></div><div class="date">${fmtDate(r.date)} &middot; Ref: ${escapeHtml(refLabel(ex))}</div></div>
+      <button class="edit-link" onclick="showExam(${examId},false,${r.id})">editar</button>
     </div>`;
   }).join('') + `</div>` : `<div class="empty">Nenhum resultado lançado para este exame.</div>`;
 
   render(`
-    <button class="back" onclick="showHistorico()">&larr; Voltar ao histórico</button>
+    <button class="back" onclick="showHistorico()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>Voltar ao histórico</button>
     <h1 class="app-title">${escapeHtml(ex.name)}</h1>
-    <p class="muted" style="margin-bottom:16px;">Referência: ${escapeHtml(ex.reference||'-')}</p>
+    <p class="muted" style="margin-bottom:16px;">Referência: ${escapeHtml(refLabel(ex))}</p>
     ${editBlock}
     <p class="list-label" style="margin-top:22px;">Resultados</p>
     ${resultsHtml}
@@ -369,33 +423,26 @@ async function showExam(examId, editMode){
 }
 async function saveExamEdit(examId){
   const name = document.getElementById('eName').value.trim();
-  const reference = document.getElementById('eRef').value.trim();
+  const min = document.getElementById('eMin').value.trim();
+  const max = document.getElementById('eMax').value.trim();
   if(!name) return;
-  await put('exams', {id:examId, name, reference});
+  await put('exams', {id:examId, name, min, max});
   showExam(examId);
 }
-async function saveResult(examId){
+async function saveResult(examId, resultId){
   const date = document.getElementById('rDate').value;
   const value = document.getElementById('rValue').value.trim();
   const err = document.getElementById('rErr');
   if(!date || !value){ err.classList.remove('hide'); return; }
   err.classList.add('hide');
-  await put('results', {examId, date, value});
-  showExam(examId);
-}
-async function editResultPrompt(resultId, examId){
-  const r = await getOne('results', resultId);
-  const newValue = prompt('Novo valor:', r.value);
-  if(newValue===null) return;
-  const newDate = prompt('Nova data (AAAA-MM-DD):', r.date);
-  if(newDate===null) return;
-  await put('results', {id:resultId, examId, date:newDate, value:newValue});
+  const record = resultId ? {id:resultId, examId, date, value} : {examId, date, value};
+  await put('results', record);
   showExam(examId);
 }
 
 function makeA4Canvas(title, lines){
   const W=794, H=1123;
-  const rowH=34, headerH=190, tableTop=150;
+  const rowH=34, headerH=196, tableTop=156;
   const cols = [ {x:50,  w:190, label:'Exame'}, {x:240, w:85,  label:'Data'},
                  {x:325, w:185, label:'Referência'}, {x:510, w:95,  label:'Resultado'},
                  {x:605, w:140, label:'Status'} ];
@@ -408,15 +455,21 @@ function makeA4Canvas(title, lines){
     const c = document.createElement('canvas'); c.width=W; c.height=H;
     const ctx = c.getContext('2d');
     ctx.fillStyle='#FFFFFF'; ctx.fillRect(0,0,W,H);
-    ctx.fillStyle='#1F2D27'; ctx.font='500 24px Arial'; ctx.fillText('Meus Exames', 50, 50);
-    if(APP_ICON_BASE64 && appIconImg.complete && appIconImg.naturalWidth){ ctx.drawImage(appIconImg, W-50-60, 28, 60, 60); }
+    ctx.fillStyle='#3CA370'; ctx.fillRect(0,0,W,10);
+    ctx.strokeStyle='#D9E6DD'; ctx.lineWidth=1.5; ctx.strokeRect(14,14,W-28,H-28);
+    ctx.fillStyle='#1F2D27'; ctx.font='500 24px Arial'; ctx.fillText('Meus Exames', 50, 56);
+    if(APP_ICON_BASE64 && appIconImg.complete && appIconImg.naturalWidth){
+      ctx.drawImage(appIconImg, W-50-50, 30, 50, 50);
+    } else {
+      ctx.font='34px Arial'; ctx.fillText('🩺', W-50-44, 60);
+    }
     ctx.font='400 14px Arial'; ctx.fillStyle='#6B7D74';
     const now=new Date(); const p=n=>String(n).padStart(2,'0');
     const genDate = p(now.getDate())+'/'+p(now.getMonth()+1)+'/'+now.getFullYear();
-    ctx.fillText(profile.name+(profile.userId? ' - ID: '+profile.userId:'')+' - Gerado em '+genDate, 50, 76);
+    ctx.fillText(profile.name+(profile.userId? ' - ID: '+profile.userId:'')+' - Gerado em '+genDate, 50, 82);
     ctx.font='500 19px Arial'; ctx.fillStyle='#1F2D27';
-    ctx.fillText(title + (pages.length>1? ' — página '+(idx+1)+'/'+pages.length : ''), 50, 112);
-    ctx.strokeStyle='#D9E6DD'; ctx.beginPath(); ctx.moveTo(50,128); ctx.lineTo(W-50,128); ctx.stroke();
+    ctx.fillText(title + (pages.length>1? ' — página '+(idx+1)+'/'+pages.length : ''), 50, 118);
+    ctx.strokeStyle='#D9E6DD'; ctx.beginPath(); ctx.moveTo(50,134); ctx.lineTo(W-50,134); ctx.stroke();
     ctx.font='600 13px Arial'; ctx.fillStyle='#6B7D74';
     cols.forEach(col=>ctx.fillText(col.label, col.x, tableTop));
     ctx.strokeStyle='#D9E6DD'; ctx.beginPath(); ctx.moveTo(50,tableTop+12); ctx.lineTo(W-50,tableTop+12); ctx.stroke();
@@ -465,8 +518,8 @@ async function shareExam(examId){
   let results = await getAll('results');
   results = results.filter(r=>r.examId===examId).sort((a,b)=>b.date.localeCompare(a.date));
   const lines = results.map(r=>{
-    const comp = compareResult(r.value, ex.reference) || 'normal';
-    return {exame:ex.name, data:fmtDate(r.date), referencia:ex.reference||'-', resultado:r.value,
+    const comp = compareResult(r.value, ex) || 'normal';
+    return {exame:ex.name, data:fmtDate(r.date), referencia:refLabel(ex), resultado:r.value,
       status: comp==='alto'?'Alto':comp==='baixo'?'Baixo':'Normal'};
   });
   const canvases = makeA4Canvas(ex.name, lines);
@@ -475,8 +528,8 @@ async function shareExam(examId){
 async function shareUltimos(){
   const rows = window._ultimosRows || [];
   const lines = rows.map(r=>{
-    const comp = compareResult(r.last.value, r.ex.reference) || 'normal';
-    return {exame:r.ex.name, data:fmtDate(r.last.date), referencia:r.ex.reference||'-', resultado:r.last.value,
+    const comp = compareResult(r.last.value, r.ex) || 'normal';
+    return {exame:r.ex.name, data:fmtDate(r.last.date), referencia:refLabel(r.ex), resultado:r.last.value,
       status: comp==='alto'?'Alto':comp==='baixo'?'Baixo':'Normal'};
   });
   const canvases = makeA4Canvas('Últimos resultados', lines);
@@ -486,7 +539,7 @@ async function shareUltimos(){
 function showPerfil(firstTime){
   const av = profile.avatar ? `<img src="${profile.avatar}">` : initials(profile.name);
   render(`
-    ${firstTime? '' : `<button class="back" onclick="showHome()">&larr; Voltar</button>`}
+    ${firstTime? '' : `<button class="back" onclick="showHome()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>Voltar</button>`}
     <h1 class="app-title">Perfil</h1>
     ${firstTime? `<p class="muted" style="margin-bottom:16px;">Cadastre seu nome para começar.</p>` : ''}
     <div style="text-align:center;margin-bottom:18px;">
@@ -522,11 +575,11 @@ async function saveProfile(){
 
 function showComoUsar(){
   render(`
-    <button class="back" onclick="showHome()">&larr; Voltar</button>
+    <button class="back" onclick="showHome()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>Voltar</button>
     <h1 class="app-title">Como usar</h1>
     <div class="muted">
       <p><strong style="font-weight:500;color:var(--text)">App funciona sem internet.</strong> Todos os registros ficam salvos apenas neste celular — nada é enviado para a internet.</p>
-      <p><strong style="font-weight:500;color:var(--text)">Cadastrar novo:</strong> crie o exame com um nome e o valor de referência (ex: "150 a 200 mg/dL").</p>
+      <p><strong style="font-weight:500;color:var(--text)">Cadastrar novo:</strong> crie o exame com um nome e, se quiser, os valores Mínimo e Máximo de referência (deixe em branco o que não se aplicar).</p>
       <p><strong style="font-weight:500;color:var(--text)">Histórico:</strong> busque um exame e toque nele para ver todos os resultados, lançar um novo ou editar o cadastro.</p>
       <p><strong style="font-weight:500;color:var(--text)">Tela inicial:</strong> mostra o resultado mais recente de cada exame.</p>
       <p><strong style="font-weight:500;color:var(--text)">Compartilhar:</strong> gera uma imagem no formato A4 com os resultados (se não couber em uma página, gera mais páginas).</p>
@@ -536,7 +589,7 @@ function showComoUsar(){
 
 function showBackup(){
   render(`
-    <button class="back" onclick="showHome()">&larr; Voltar</button>
+    <button class="back" onclick="showHome()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>Voltar</button>
     <h1 class="app-title">Backup</h1>
     <div class="muted">
       <p>Ao exportar, o arquivo é salvo na pasta <strong style="font-weight:500;color:var(--text)">Download</strong> do celular.</p>
@@ -584,7 +637,7 @@ function importBackup(e){
 }
 
 Object.assign(window, {showHome, showHistorico, showCadastro, saveExam, showExam, saveExamEdit,
-  saveResult, editResultPrompt, shareExam, shareUltimos, showPerfil, saveProfile, showComoUsar,
+  saveResult, shareExam, shareUltimos, showPerfil, saveProfile, showComoUsar,
   showBackup, exportBackup, openMenu, closeMenu});
 
 boot();
